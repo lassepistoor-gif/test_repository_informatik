@@ -61,7 +61,7 @@ function chickenPrice() {
   return 12 + Math.max(0, state.chickens - 1) * 8;
 }
 
-function render() {
+function render(updateEggTray = true) {
   elements.money.textContent = state.money;
   elements.chickenCount.textContent = state.chickens;
   elements.eggCount.textContent = state.eggs;
@@ -99,6 +99,27 @@ function render() {
   }
   elements.chickenRoost.replaceChildren(chickenFragment);
 
+  if (updateEggTray) renderEggTray();
+
+  elements.conveyorNotice.classList.toggle('hidden', !state.conveyor);
+  elements.eggInstruction.textContent = state.conveyor
+    ? 'Deine Eier reisen jetzt ganz von allein.'
+    : 'Zieh ein Ei zum Stand oder tippe es an.';
+  elements.dropHint.textContent = state.conveyor ? 'Automatischer Verkauf' : 'Eier hier ablegen';
+  elements.buyConveyor.disabled = state.conveyor || state.money < 35;
+  elements.buyConveyor.innerHTML = state.conveyor ? 'Gekauft <span aria-hidden="true">✓</span>' : '35 € <span aria-hidden="true">↗</span>';
+  elements.buyConveyor.setAttribute('aria-label', state.conveyor ? 'Förderband gekauft' : 'Förderband für 35 Euro kaufen');
+  elements.beltDetail.textContent = state.conveyor ? 'Ist bereits im Einsatz.' : 'Nie wieder selbst tragen.';
+  elements.farmMessage.textContent = getFarmMessage();
+
+  const secondsPerEgg = Math.max(3, 8 - Math.floor((state.chickens - 1) / 2));
+  const secondsLeft = Math.ceil(secondsPerEgg * (1 - state.layProgress));
+  elements.layTimer.textContent = state.feed > 0 && state.water > 0
+    ? `Nächstes Ei in ${secondsLeft} s`
+    : 'Ohne Futter und Wasser keine Eier';
+}
+
+function renderEggTray() {
   const eggFragment = document.createDocumentFragment();
   const visibleEggs = Math.min(state.eggs, 36);
   for (let index = 0; index < visibleEggs; index += 1) {
@@ -136,23 +157,6 @@ function render() {
     eggFragment.append(empty);
   }
   elements.eggTray.replaceChildren(eggFragment);
-
-  elements.conveyorNotice.classList.toggle('hidden', !state.conveyor);
-  elements.eggInstruction.textContent = state.conveyor
-    ? 'Deine Eier reisen jetzt ganz von allein.'
-    : 'Zieh ein Ei zum Stand oder tippe es an.';
-  elements.dropHint.textContent = state.conveyor ? 'Automatischer Verkauf' : 'Eier hier ablegen';
-  elements.buyConveyor.disabled = state.conveyor || state.money < 35;
-  elements.buyConveyor.innerHTML = state.conveyor ? 'Gekauft <span aria-hidden="true">✓</span>' : '35 € <span aria-hidden="true">↗</span>';
-  elements.buyConveyor.setAttribute('aria-label', state.conveyor ? 'Förderband gekauft' : 'Förderband für 35 Euro kaufen');
-  elements.beltDetail.textContent = state.conveyor ? 'Ist bereits im Einsatz.' : 'Nie wieder selbst tragen.';
-  elements.farmMessage.textContent = getFarmMessage();
-
-  const secondsPerEgg = Math.max(3, 8 - Math.floor((state.chickens - 1) / 2));
-  const secondsLeft = Math.ceil(secondsPerEgg * (1 - state.layProgress));
-  elements.layTimer.textContent = state.feed > 0 && state.water > 0
-    ? `Nächstes Ei in ${secondsLeft} s`
-    : 'Ohne Futter und Wasser keine Eier';
 }
 
 function renderEggs() {
@@ -279,7 +283,7 @@ setInterval(() => {
   }
 
   if (changed || state.conveyor) saveGame();
-  render();
+  render(changed);
 }, 1000);
 
 render();
