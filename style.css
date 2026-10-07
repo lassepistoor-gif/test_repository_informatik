@@ -70,10 +70,32 @@ h2 { margin: 0; font-family: Fraunces, Georgia, serif; font-size: 20px; font-wei
 .coop-door { position: absolute; right: 18px; bottom: 0; width: 43px; height: 66px; border: 3px solid #f5e2b8; border-bottom: 0; border-radius: 20px 20px 0 0; background: #a56b45; }
 .coop-sign { position: absolute; top: 6px; right: 19px; padding: 3px 5px; border-radius: 2px; background: #fff4d9; color: #9c6747; font-size: 6px; font-weight: 800; line-height: 1.1; text-align: center; }
 .coop-step { position: absolute; right: 13px; bottom: 2px; width: 53px; height: 9px; border-radius: 2px; background: #9b7050; }
-.chicken-roost { position: absolute; z-index: 4; right: -69px; bottom: -3px; display: flex; align-items: end; max-width: 178px; min-height: 44px; }
-.chicken-sprite { display: inline-block; margin-left: -4px; font-size: 30px; filter: drop-shadow(0 2px 1px #526c3433); animation: chicken-bob 2s ease-in-out infinite; }
-.chicken-sprite:nth-child(even) { animation-delay: -.8s; }
-@keyframes chicken-bob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-3px) rotate(2deg); } }
+.chicken-field { position: absolute; z-index: 5; inset: 0; overflow: hidden; pointer-events: none; }
+.chicken-actor { position: absolute; width: 57px; height: 48px; transform: translate(-50%, -50%); }
+.chicken-art { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 1px #526c3440); }
+.chicken-body, .chicken-neck, .chicken-head { fill: #fffdf2; stroke: #bd9668; stroke-width: 1.5; }
+.chicken-tail { fill: #fffdf2; stroke: #bd9668; stroke-width: 1.5; stroke-linejoin: round; }
+.chicken-wing { fill: #e8d6b7; stroke: #bd9668; stroke-width: 1; transform-box: fill-box; transform-origin: center; }
+.chicken-comb, .chicken-wattle { fill: #d66d55; }
+.chicken-beak { fill: #e8a744; stroke: #bd9668; stroke-width: .8; }
+.chicken-eye { fill: #45372e; }
+.chicken-leg { fill: none; stroke: #d78a3f; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.facing-left .chicken-art { transform: scaleX(-1); }
+.chicken-actor:not(.feeding):not(.drinking) .chicken-leg { animation: walk-legs .22s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+.chicken-actor:not(.feeding):not(.drinking) .chicken-body { animation: walk-bob .32s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+.chicken-actor.feeding .chicken-head, .chicken-actor.drinking .chicken-head { animation: peck 0.42s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: bottom left; }
+@keyframes walk-legs { to { transform: translateY(-2px) rotate(8deg); } }
+@keyframes walk-bob { to { transform: translateY(-1px); } }
+@keyframes peck { to { transform: translateY(4px) rotate(12deg); } }
+.farm-trough { position: absolute; z-index: 4; top: 77%; display: flex; width: 76px; height: 59px; align-items: center; flex-direction: column; justify-content: center; gap: 2px; padding: 3px 5px; border: 0; background: transparent; cursor: pointer; transform: translate(-50%, -50%); }
+.feed-trough { left: 50%; }.water-trough { left: 67%; }
+.trough-label { padding: 2px 5px; border-radius: 3px; background: #fff9e7; color: #4b6743; font-size: 7px; font-weight: 800; letter-spacing: .7px; }
+.trough-bowl { position: relative; width: 49px; height: 23px; overflow: hidden; border: 3px solid #9d6847; border-top-width: 4px; border-radius: 4px 4px 12px 12px; background: #cf9a64; box-shadow: 0 3px 0 #815940; }
+.trough-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 72%; background: repeating-linear-gradient(135deg, #d8b254, #d8b254 4px, #ebcf79 4px, #ebcf79 7px); transition: width .25s ease; }
+.water-trough .trough-fill { background: linear-gradient(#96d0d0, #61aeb1); }
+.trough-rim { position: absolute; inset: -3px -3px auto; height: 5px; border-radius: 4px; background: #b27a51; }
+.trough-level { color: #fffdf0; font-size: 8px; font-weight: 800; text-shadow: 0 1px 2px #38513a; }
+.farm-trough:hover .trough-bowl, .farm-trough:focus-visible .trough-bowl { filter: brightness(1.08); }
 .grass-detail { position: absolute; z-index: 2; color: #fff5d5; font-size: 16px; }.grass-one { left: 8%; bottom: 49px; }.grass-two { right: 35%; bottom: 69px; color: #f7e4ab; }
 .farm-path { position: absolute; z-index: 1; right: 18%; bottom: -60px; width: 147px; height: 114px; border-radius: 50%; background: #d5bb8f; transform: rotate(-21deg); }
 .sell-stand { position: absolute; z-index: 4; right: 11%; bottom: 47px; width: 125px; height: 108px; padding: 0; border: 0; background: transparent; cursor: pointer; transition: transform .15s ease; }
@@ -110,11 +132,11 @@ h2 { margin: 0; font-family: Fraunces, Georgia, serif; font-size: 20px; font-wei
 .shop-heading { display: flex; align-items: center; justify-content: space-between; }.shop-heading h2 { font-size: 21px; }.shop-bag { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 9px; background: #edf1e3; font-size: 17px; }
 .shop-intro { margin: 6px 0 17px; color: #85897e; font-size: 10px; }
 .shop-items { border-top: 1px solid #efede4; }
-.shop-item { display: grid; grid-template-columns: 45px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-height: 105px; padding: 12px 0; border-bottom: 1px solid #efede4; }
-.item-visual { position: relative; display: grid; place-items: center; width: 43px; height: 48px; border-radius: 8px; font-size: 22px; }.hen-visual { background: #f7ecd1; }.belt-visual { background: #e3efeb; font-size: 18px; }.item-visual i { position: absolute; right: -4px; bottom: -3px; display: grid; place-items: center; width: 17px; height: 17px; border: 2px solid white; border-radius: 50%; background: #779565; color: white; font-size: 10px; font-style: normal; }
+.shop-item { display: grid; grid-template-columns: 45px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-height: 91px; padding: 10px 0; border-bottom: 1px solid #efede4; }
+.item-visual { position: relative; display: grid; place-items: center; width: 43px; height: 48px; border-radius: 8px; font-size: 22px; }.hen-visual { background: #f7ecd1; }.belt-visual { background: #e3efeb; font-size: 18px; }.nest-visual { background: #f1e8dc; }.feeder-visual { background: #f7efd8; }.pump-visual { background: #e1efef; }.item-visual i { position: absolute; right: -4px; bottom: -3px; display: grid; place-items: center; width: 17px; height: 17px; border: 2px solid white; border-radius: 50%; background: #779565; color: white; font-size: 10px; font-style: normal; }
 .item-copy h3 { margin: 0 0 3px; font-size: 11px; }.item-copy p { margin: 0 0 5px; color: #85897e; font-size: 9px; line-height: 1.4; }.item-detail { color: #98998c; font-size: 8px; }.item-detail strong { color: #69785d; }
 .buy-button { display: flex; align-items: center; gap: 7px; padding: 8px 9px; border: 0; border-radius: 6px; background: #5c804e; color: white; font-size: 9px; font-weight: 800; white-space: nowrap; cursor: pointer; transition: background .15s, transform .15s; }.buy-button:hover:not(:disabled) { transform: translateY(-1px); background: #456b3e; }.buy-button:disabled { background: #c6c9ba; cursor: not-allowed; }.buy-button span { font-size: 11px; }
-.shop-tip { display: flex; gap: 9px; margin-top: 17px; padding: 12px 11px; border: 1px solid #efe6c7; border-radius: 7px; background: #fcf7e8; }.shop-tip > span { font-size: 15px; }.shop-tip p { margin: 0; color: #8b866f; font-size: 9px; line-height: 1.5; }.shop-tip strong { display: block; margin-bottom: 2px; color: #796737; font-size: 9px; }
+.shop-tip { display: flex; gap: 9px; margin-top: 12px; padding: 10px 11px; border: 1px solid #efe6c7; border-radius: 7px; background: #fcf7e8; }.shop-tip > span { font-size: 15px; }.shop-tip p { margin: 0; color: #8b866f; font-size: 9px; line-height: 1.5; }.shop-tip strong { display: block; margin-bottom: 2px; color: #796737; font-size: 9px; }
 .reset-button { display: block; margin: 14px auto 0; padding: 5px 8px; border: 0; background: transparent; color: #98988a; font-size: 9px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }.reset-button:hover { color: #a85e48; }
 .toast { position: fixed; z-index: 10; right: 24px; bottom: 22px; max-width: min(330px, calc(100vw - 32px)); padding: 12px 16px; border: 1px solid #d9e4d0; border-radius: 7px; background: #fffefa; box-shadow: 0 8px 24px #29392420; color: #42613f; font-size: 12px; font-weight: 700; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .18s, transform .18s; }.toast.visible { opacity: 1; transform: translateY(0); }
 .page-footer { display: flex; justify-content: space-between; padding: 15px 1px 0; color: #a19f8e; font-size: 9px; }.page-footer span:first-child { font-family: Fraunces, Georgia, serif; font-size: 11px; }

@@ -48,8 +48,18 @@
               <div class="coop-roof"><span class="roof-chimney"></span></div>
               <div class="coop-wall"><span class="coop-window"></span><span class="coop-door"></span><span class="coop-sign">HOF<br />NR. 1</span></div>
               <div class="coop-step"></div>
-              <div class="chicken-roost" id="chicken-roost" aria-label="Deine Hühner"></div>
             </div>
+            <div class="chicken-field" id="chicken-field" aria-label="Hühner auf dem Feld"></div>
+            <button class="farm-trough feed-trough" id="scene-feed-trough" type="button" aria-label="Futtertrog auffüllen, kostet 2 Euro">
+              <span class="trough-label">FUTTER</span>
+              <span class="trough-bowl"><span class="trough-fill" id="feed-scene-fill"></span><span class="trough-rim"></span></span>
+              <span class="trough-level" id="feed-scene-level">100%</span>
+            </button>
+            <button class="farm-trough water-trough" id="scene-water-trough" type="button" aria-label="Wassertrog auffüllen, kostet 1 Euro">
+              <span class="trough-label">WASSER</span>
+              <span class="trough-bowl"><span class="trough-fill" id="water-scene-fill"></span><span class="trough-rim"></span></span>
+              <span class="trough-level" id="water-scene-level">100%</span>
+            </button>
             <div class="grass-detail grass-one" aria-hidden="true">✿</div><div class="grass-detail grass-two" aria-hidden="true">✿</div>
             <div class="scene-label stand-label"><span>🧺</span> VERKAUFSSTAND</div>
             <button class="sell-stand" id="sell-stand" type="button" aria-label="Eier zum Verkaufsstand bringen und verkaufen">
@@ -97,6 +107,21 @@
               <div class="item-visual belt-visual" aria-hidden="true"><span>🥚</span><i>➜</i></div>
               <div class="item-copy"><h3>Förderband</h3><p>Transportiert Eier automatisch zum Stand.</p><span class="item-detail" id="belt-detail">Nie wieder selbst tragen.</span></div>
               <button class="buy-button" id="buy-conveyor" type="button" aria-label="Förderband für 35 Euro kaufen">35 € <span aria-hidden="true">↗</span></button>
+            </article>
+            <article class="shop-item">
+              <div class="item-visual nest-visual" aria-hidden="true"><span>🪺</span><i>+</i></div>
+              <div class="item-copy"><h3>Nistkasten</h3><p>Hühner legen 25 % schneller Eier.</p><span class="item-detail" id="nest-detail">Mehr Eier in kürzerer Zeit.</span></div>
+              <button class="buy-button" id="buy-nest" type="button" aria-label="Nistkasten für 45 Euro kaufen">45 € <span aria-hidden="true">↗</span></button>
+            </article>
+            <article class="shop-item">
+              <div class="item-visual feeder-visual" aria-hidden="true"><span>🌾</span><i>↓</i></div>
+              <div class="item-copy"><h3>Futterautomat</h3><p>Spart 40 % Futter bei jedem Farmtag.</p><span class="item-detail" id="feeder-detail">Der Vorrat reicht länger.</span></div>
+              <button class="buy-button" id="buy-feeder" type="button" aria-label="Futterautomat für 55 Euro kaufen">55 € <span aria-hidden="true">↗</span></button>
+            </article>
+            <article class="shop-item">
+              <div class="item-visual pump-visual" aria-hidden="true"><span>💧</span><i>↑</i></div>
+              <div class="item-copy"><h3>Wasserpumpe</h3><p>Senkt den Wasserverbrauch um 40 %.</p><span class="item-detail" id="pump-detail">Frisches Wasser für länger.</span></div>
+              <button class="buy-button" id="buy-pump" type="button" aria-label="Wasserpumpe für 50 Euro kaufen">50 € <span aria-hidden="true">↗</span></button>
             </article>
           </div>
           <div class="shop-tip"><span aria-hidden="true">💡</span><p><strong>Kleiner Tipp</strong>Jedes verkaufte Ei bringt dir 4 € ein. Investiere klug und dein Hof wächst von allein.</p></div>
