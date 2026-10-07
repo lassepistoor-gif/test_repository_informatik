@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f0df" />
+    <title>Hofglück – Deine kleine Hühnerfarm</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="main.js" defer></script>
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="topbar">
+        <a class="brand" href="#farm" aria-label="Hofglück Startseite">
+          <span class="brand-mark" aria-hidden="true">🐔</span>
+          <span><strong>Hofglück</strong><small>DEINE KLEINE HÜHNERFARM</small></span>
+        </a>
+        <div class="topbar-right">
+          <span class="day-label"><span class="sun-dot" aria-hidden="true"></span> Ein neuer Farmtag</span>
+          <div class="money-pill" aria-label="Kontostand"><span aria-hidden="true">🪙</span><strong id="money">24</strong><span>€</span></div>
+        </div>
+      </header>
+
+      <section class="welcome-row" aria-label="Farmübersicht">
+        <div>
+          <p class="eyebrow">WILLKOMMEN AUF DEINEM HOF</p>
+          <h1>Ein guter Tag beginnt <span>im Hühnerstall.</span></h1>
+          <p class="welcome-copy">Füttere deine Hühner, sammle frische Eier und lass deinen Hof wachsen.</p>
+        </div>
+        <div class="farm-stats" aria-live="polite">
+          <div class="stat"><span class="stat-icon chicken-icon" aria-hidden="true">🐔</span><span><strong id="chicken-count">1</strong><small>Hühner</small></span></div>
+          <div class="stat"><span class="stat-icon egg-icon" aria-hidden="true">🥚</span><span><strong id="egg-count">0</strong><small>Eier im Stall</small></span></div>
+          <div class="stat"><span class="stat-icon coin-icon" aria-hidden="true">🧺</span><span><strong id="sold-count">0</strong><small>Eier verkauft</small></span></div>
+        </div>
+      </section>
+
+      <div class="game-layout" id="farm">
+        <section class="farm-panel" aria-labelledby="farm-heading">
+          <div class="section-heading">
+            <div><p class="eyebrow">DEIN LAND</p><h2 id="farm-heading">Der Hühnerhof</h2></div>
+            <span class="live-status"><span></span> LÄUFT</span>
+          </div>
+
+          <div class="farm-scene">
+            <div class="scene-sky" aria-hidden="true"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span><span class="sun"></span><span class="hill hill-back"></span><span class="hill hill-front"></span></div>
+            <div class="scene-label coop-label"><span>🏠</span> HÜHNERSTALL</div>
+            <div class="coop">
+              <div class="coop-roof"><span class="roof-chimney"></span></div>
+              <div class="coop-wall"><span class="coop-window"></span><span class="coop-door"></span><span class="coop-sign">HOF<br />NR. 1</span></div>
+              <div class="coop-step"></div>
+              <div class="chicken-roost" id="chicken-roost" aria-label="Deine Hühner"></div>
+            </div>
+            <div class="grass-detail grass-one" aria-hidden="true">✿</div><div class="grass-detail grass-two" aria-hidden="true">✿</div>
+            <div class="scene-label stand-label"><span>🧺</span> VERKAUFSSTAND</div>
+            <button class="sell-stand" id="sell-stand" type="button" aria-label="Eier zum Verkaufsstand bringen und verkaufen">
+              <span class="stand-awning"><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="stand-roof"></span><span class="stand-body"><span class="stand-shelf"></span><span class="stand-crate">🥚</span><span class="stand-crate">🥚</span><span class="stand-sign">FRISCHE<br />EIER</span></span>
+              <span class="stand-legs"></span>
+              <span class="stand-drop-hint" id="drop-hint">Eier hier ablegen</span>
+            </button>
+            <div class="farm-path" aria-hidden="true"></div>
+          </div>
+
+          <div class="farm-lower">
+            <section class="egg-area" aria-labelledby="eggs-heading">
+              <div class="lower-heading"><div><h3 id="eggs-heading">Eier im Stall</h3><span class="subtle" id="egg-instruction">Zieh ein Ei zum Stand oder tippe es an.</span></div><span class="egg-total"><span aria-hidden="true">🥚</span> <strong id="egg-total">0</strong></span></div>
+              <div class="egg-tray" id="egg-tray" aria-label="Eier, die zum Verkaufsstand gebracht werden können"></div>
+              <div class="conveyor-notice hidden" id="conveyor-notice"><span aria-hidden="true">⚙️</span> Das Förderband bringt deine Eier automatisch zum Stand.</div>
+            </section>
+            <section class="needs-area" aria-labelledby="needs-heading">
+              <div class="lower-heading"><div><h3 id="needs-heading">Versorgung</h3><span class="subtle">Gut versorgt legt sich's leichter.</span></div></div>
+              <div class="need-row">
+                <div class="need-icon feed-icon" aria-hidden="true">🌾</div>
+                <div class="need-info"><div class="need-title"><strong>Futter</strong><span id="feed-percent">100%</span></div><div class="meter"><span id="feed-meter"></span></div></div>
+                <button class="refill-button" id="refill-feed" type="button" aria-label="Futter nachfüllen, kostet 2 Euro"><span aria-hidden="true">＋</span><span>2 €</span></button>
+              </div>
+              <div class="need-row">
+                <div class="need-icon water-icon" aria-hidden="true">💧</div>
+                <div class="need-info"><div class="need-title"><strong>Wasser</strong><span id="water-percent">100%</span></div><div class="meter water-meter"><span id="water-meter"></span></div></div>
+                <button class="refill-button" id="refill-water" type="button" aria-label="Wasser nachfüllen, kostet 1 Euro"><span aria-hidden="true">＋</span><span>1 €</span></button>
+              </div>
+            </section>
+          </div>
+          <div class="farm-footer"><span><span class="pulse-dot"></span> <strong id="farm-message">Dein erstes Huhn ist bereit für den Tag.</strong></span><span id="lay-timer">Nächstes Ei in 8 s</span></div>
+        </section>
+
+        <aside class="shop-panel" aria-labelledby="shop-heading">
+          <div class="shop-heading"><div><p class="eyebrow">GUTE INVESTITIONEN</p><h2 id="shop-heading">Hofladen</h2></div><span class="shop-bag" aria-hidden="true">🛒</span></div>
+          <p class="shop-intro">Ein bisschen Hilfe macht den Hof noch besser.</p>
+          <div class="shop-items">
+            <article class="shop-item">
+              <div class="item-visual hen-visual" aria-hidden="true"><span>🐔</span><i>+</i></div>
+              <div class="item-copy"><h3>Ein Huhn</h3><p>Legt regelmäßig ein frisches Ei.</p><span class="item-detail">Nächstes Huhn: <strong id="chicken-price-label">12 €</strong></span></div>
+              <button class="buy-button" id="buy-chicken" type="button" aria-label="Ein Huhn kaufen">12 € <span aria-hidden="true">↗</span></button>
+            </article>
+            <article class="shop-item">
+              <div class="item-visual belt-visual" aria-hidden="true"><span>🥚</span><i>➜</i></div>
+              <div class="item-copy"><h3>Förderband</h3><p>Transportiert Eier automatisch zum Stand.</p><span class="item-detail" id="belt-detail">Nie wieder selbst tragen.</span></div>
+              <button class="buy-button" id="buy-conveyor" type="button" aria-label="Förderband für 35 Euro kaufen">35 € <span aria-hidden="true">↗</span></button>
+            </article>
+          </div>
+          <div class="shop-tip"><span aria-hidden="true">💡</span><p><strong>Kleiner Tipp</strong>Jedes verkaufte Ei bringt dir 4 € ein. Investiere klug und dein Hof wächst von allein.</p></div>
+          <button class="reset-button" id="reset-game" type="button">Neuen Hof beginnen</button>
+        </aside>
+      </div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <footer class="page-footer"><span>Hofglück</span><span>Mit Herz und Hühnern gemacht</span></footer>
+    </main>
+  </body>
+</html>
