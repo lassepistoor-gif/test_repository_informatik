@@ -1,14 +1,19 @@
 const SAVE_KEY = 'hofglueck-save-v1';
 const EGG_PRICE = 4;
-const UPGRADE_PRICES = { nestBox: 45, feedAutomation: 55, waterPump: 50 };
+const RETIREMENT_GOAL = 50;
+const UPGRADE_PRICES = { basket: 30, conveyor: 90, nestBox: 45, feedAutomation: 55, waterPump: 50 };
 const INITIAL_STATE = {
   money: 24,
   chickens: 1,
   eggs: 0,
   sold: 0,
+  carriedEggs: 0,
+  eggCapacity: 3,
   feed: 100,
   water: 100,
   conveyor: false,
+  basketUpgrade: false,
+  retired: false,
   nestBox: false,
   feedAutomation: false,
   waterPump: false,
@@ -23,6 +28,9 @@ const elements = {
   soldCount: document.querySelector('#sold-count'),
   eggTotal: document.querySelector('#egg-total'),
   chickenField: document.querySelector('#chicken-field'),
+  eggField: document.querySelector('#egg-field'),
+  carriedCount: document.querySelector('#carried-count'),
+  farmDay: document.querySelector('#farm-day'),
   eggTray: document.querySelector('#egg-tray'),
   feedPercent: document.querySelector('#feed-percent'),
   feedMeter: document.querySelector('#feed-meter'),
@@ -40,6 +48,8 @@ const elements = {
   chickenPriceLabel: document.querySelector('#chicken-price-label'),
   buyConveyor: document.querySelector('#buy-conveyor'),
   beltDetail: document.querySelector('#belt-detail'),
+  buyBasket: document.querySelector('#buy-basket'),
+  basketDetail: document.querySelector('#basket-detail'),
   buyNest: document.querySelector('#buy-nest'),
   nestDetail: document.querySelector('#nest-detail'),
   buyFeeder: document.querySelector('#buy-feeder'),
@@ -54,6 +64,11 @@ const elements = {
   dropHint: document.querySelector('#drop-hint'),
   toast: document.querySelector('#toast'),
   reset: document.querySelector('#reset-game'),
+  retirementSold: document.querySelector('#retirement-sold'),
+  retirementProgress: document.querySelector('#retirement-progress'),
+  retireButton: document.querySelector('#retire-button'),
+  retireDialog: document.querySelector('#retire-dialog'),
+  closeRetire: document.querySelector('#close-retire'),
 };
 
 let selectedEgg = null;
@@ -166,6 +181,9 @@ function render(updateEggTray = true) {
   elements.eggCount.textContent = state.eggs;
   elements.eggTotal.textContent = state.eggs;
   elements.soldCount.textContent = state.sold;
+  elements.carriedCount.textContent = `${state.carriedEggs}/${state.eggCapacity}`;
+  elements.eggTotal.textContent = state.carriedEggs;
+  elements.farmDay.textContent = String(Math.floor(state.sold / 5) + 1).padStart(2, '0');
   elements.feedPercent.textContent = `${Math.ceil(state.feed)}%`;
   elements.waterPercent.textContent = `${Math.ceil(state.water)}%`;
   elements.feedMeter.style.width = `${state.feed}%`;
@@ -194,10 +212,17 @@ function render(updateEggTray = true) {
     ? 'Deine Eier reisen jetzt ganz von allein.'
     : 'Zieh ein Ei zum Stand oder tippe es an.';
   elements.dropHint.textContent = state.conveyor ? 'Automatischer Verkauf' : 'Eier hier ablegen';
-  elements.buyConveyor.disabled = state.conveyor || state.money < 35;
-  elements.buyConveyor.innerHTML = state.conveyor ? 'Gekauft <span aria-hidden="true">✓</span>' : '35 € <span aria-hidden="true">↗</span>';
-  elements.buyConveyor.setAttribute('aria-label', state.conveyor ? 'Förderband gekauft' : 'Förderband für 35 Euro kaufen');
+  elements.buyConveyor.disabled = state.conveyor || state.money < UPGRADE_PRICES.conveyor;
+  elements.buyConveyor.innerHTML = state.conveyor ? 'Gekauft <span aria-hidden="true">✓</span>' : `${UPGRADE_PRICES.conveyor} € <span aria-hidden="true">↗</span>`;
+  elements.buyConveyor.setAttribute('aria-label', state.conveyor ? 'Förderband gekauft' : `Förderband für ${UPGRADE_PRICES.conveyor} Euro kaufen`);
   elements.beltDetail.textContent = state.conveyor ? 'Ist bereits im Einsatz.' : 'Nie wieder selbst tragen.';
+  elements.buyBasket.disabled = state.basketUpgrade || state.money < UPGRADE_PRICES.basket;
+  elements.buyBasket.innerHTML = state.basketUpgrade ? 'Gekauft <span aria-hidden="true">✓</span>' : `${UPGRADE_PRICES.basket} € <span aria-hidden="true">↗</span>`;
+  elements.buyBasket.setAttribute('aria-label', state.basketUpgrade ? 'Großer Eierkorb gekauft' : `Großen Eierkorb für ${UPGRADE_PRICES.basket} Euro kaufen`);
+  elements.basketDetail.textContent = state.basketUpgrade ? 'Der Korb fasst jetzt 8 Eier.' : 'Mehr Eier pro Marktgang.';
+  elements.retirementSold.textContent = Math.min(state.sold, RETIREMENT_GOAL);
+  elements.retirementProgress.style.width = `${Math.min(100, state.sold / RETIREMENT_GOAL * 100)}%`;
+  elements.retireButton.disabled = state.sold < RETIREMENT_GOAL || state.retired;
   updateUpgrade(elements.buyNest, elements.nestDetail, 'nestBox', 'Nistkasten', 'Mehr Eier in kürzerer Zeit.');
   updateUpgrade(elements.buyFeeder, elements.feederDetail, 'feedAutomation', 'Futterautomat', 'Der Vorrat reicht länger.');
   updateUpgrade(elements.buyPump, elements.pumpDetail, 'waterPump', 'Wasserpumpe', 'Frisches Wasser für länger.');
@@ -224,43 +249,59 @@ function updateUpgrade(button, detail, key, name, hint) {
 }
 
 function renderEggTray() {
-  const eggFragment = document.createDocumentFragment();
-  const visibleEggs = Math.min(state.eggs, 36);
+  const fieldFragment = document.createDocumentFragment();
+  const visibleEggs = Math.min(state.eggs, 24);
   for (let index = 0; index < visibleEggs; index += 1) {
     const egg = document.createElement('button');
-    egg.className = `egg-token${selectedEgg === index ? ' selected' : ''}`;
+    egg.className = 'field-egg';
     egg.type = 'button';
     egg.draggable = !state.conveyor;
-    egg.textContent = '🥚';
-    egg.setAttribute('aria-label', `Ei ${index + 1} zum Verkaufsstand bringen`);
-    egg.addEventListener('click', () => {
-      if (state.conveyor) return;
-      selectedEgg = selectedEgg === index ? null : index;
-      renderEggs();
-    });
+    egg.style.left = `${28 + ((index * 31) % 66)}%`;
+    egg.style.top = `${57 + ((index * 19) % 34)}%`;
+    egg.innerHTML = '<i aria-hidden="true"></i>';
+    egg.setAttribute('aria-label', `Ei ${index + 1} einsammeln`);
+    egg.addEventListener('click', collectEgg);
     egg.addEventListener('dragstart', (event) => {
-      selectedEgg = index;
-      event.dataTransfer.setData('text/plain', String(index));
+      event.dataTransfer.setData('text/plain', 'egg');
       event.dataTransfer.effectAllowed = 'move';
-      egg.classList.add('selected');
     });
-    egg.addEventListener('dragend', () => egg.classList.remove('selected'));
-    eggFragment.append(egg);
+    fieldFragment.append(egg);
   }
   if (state.eggs > visibleEggs) {
     const more = document.createElement('span');
-    more.className = 'egg-token';
+    more.className = 'egg-overflow';
     more.textContent = `+${state.eggs - visibleEggs}`;
-    more.setAttribute('aria-label', `${state.eggs - visibleEggs} weitere Eier`);
-    eggFragment.append(more);
+    fieldFragment.append(more);
   }
-  if (state.eggs === 0) {
+  elements.eggField.replaceChildren(fieldFragment);
+
+  const eggFragment = document.createDocumentFragment();
+  for (let index = 0; index < state.carriedEggs; index += 1) {
+    const egg = document.createElement('span');
+    egg.className = 'egg-token';
+    egg.textContent = '🥚';
+    eggFragment.append(egg);
+  }
+  if (state.carriedEggs === 0) {
     const empty = document.createElement('div');
     empty.className = 'empty-eggs';
-    empty.innerHTML = '<span aria-hidden="true">🥚</span> Hier warten bald frische Eier.';
+    empty.innerHTML = '<span aria-hidden="true">🧺</span> Dein Korb ist noch leer.';
     eggFragment.append(empty);
   }
   elements.eggTray.replaceChildren(eggFragment);
+}
+
+function collectEgg() {
+  if (state.conveyor || state.eggs < 1) return;
+  if (state.carriedEggs >= state.eggCapacity) {
+    showToast('Dein Korb ist voll. Bring die Eier zum Markt!');
+    return;
+  }
+  state.eggs -= 1;
+  state.carriedEggs += 1;
+  selectedEgg = null;
+  saveGame();
+  render();
 }
 
 function renderEggs() {
@@ -283,12 +324,12 @@ function showToast(message) {
 }
 
 function sellEggs(amount = 1) {
-  if (state.eggs === 0) {
-    showToast('Im Stall wartet gerade kein Ei.');
+  if (state.carriedEggs === 0) {
+    showToast('Sammle erst Eier auf dem Feld ein.');
     return;
   }
-  const soldNow = Math.min(amount, state.eggs);
-  state.eggs -= soldNow;
+  const soldNow = Math.min(amount, state.carriedEggs);
+  state.carriedEggs -= soldNow;
   state.sold += soldNow;
   state.money += soldNow * EGG_PRICE;
   selectedEgg = null;
@@ -332,12 +373,28 @@ elements.buyChicken.addEventListener('click', () => {
 
 elements.buyConveyor.addEventListener('click', () => {
   if (state.conveyor) return;
-  if (state.money < 35) return showToast('Das Förderband kostet 35 €. Sammle noch ein paar Eier.');
-  state.money -= 35;
+  if (state.money < UPGRADE_PRICES.conveyor) return showToast(`Das Förderband kostet ${UPGRADE_PRICES.conveyor} €. Sammle noch ein paar Eier.`);
+  state.money -= UPGRADE_PRICES.conveyor;
   state.conveyor = true;
+  const storedEggs = state.eggs + state.carriedEggs;
+  state.eggs = 0;
+  state.carriedEggs = 0;
+  state.sold += storedEggs;
+  state.money += storedEggs * EGG_PRICE;
   saveGame();
   render();
   showToast('Das Förderband läuft. Eier werden automatisch verkauft!');
+});
+
+elements.buyBasket.addEventListener('click', () => {
+  if (state.basketUpgrade) return;
+  if (state.money < UPGRADE_PRICES.basket) return showToast(`Der große Korb kostet ${UPGRADE_PRICES.basket} €.`);
+  state.money -= UPGRADE_PRICES.basket;
+  state.eggCapacity = 8;
+  state.basketUpgrade = true;
+  saveGame();
+  render();
+  showToast('Dein Korb fasst jetzt 8 Eier!');
 });
 
 for (const [button, key, name] of [
@@ -359,8 +416,7 @@ for (const [button, key, name] of [
 
 elements.stand.addEventListener('click', () => {
   if (state.conveyor) return showToast('Das Förderband kümmert sich schon um deine Eier.');
-  if (selectedEgg !== null) sellEggs(1);
-  else sellEggs(state.eggs);
+  sellEggs(state.carriedEggs);
 });
 
 elements.stand.addEventListener('dragover', (event) => {
@@ -376,8 +432,20 @@ elements.stand.addEventListener('dragleave', (event) => {
 elements.stand.addEventListener('drop', (event) => {
   event.preventDefault();
   elements.stand.classList.remove('drag-over');
-  if (!state.conveyor) sellEggs(1);
+  if (!state.conveyor && state.eggs > 0 && state.carriedEggs < state.eggCapacity) {
+    collectEgg();
+    sellEggs(state.carriedEggs);
+  }
 });
+
+elements.retireButton.addEventListener('click', () => {
+  if (state.sold < RETIREMENT_GOAL) return;
+  state.retired = true;
+  saveGame();
+  render();
+  elements.retireDialog.showModal();
+});
+elements.closeRetire.addEventListener('click', () => elements.retireDialog.close());
 
 elements.reset.addEventListener('click', () => {
   if (!window.confirm('Möchtest du wirklich einen neuen Hof beginnen? Dein aktueller Spielstand geht verloren.')) return;
